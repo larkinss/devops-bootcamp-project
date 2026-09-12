@@ -51,7 +51,9 @@ resource "aws_iam_role_policy" "ssm_transfer" {
         Action = [
           "s3:GetObject",
           "s3:PutObject",
-          "s3:GetEncryptionConfiguration"
+          "s3:GetEncryptionConfiguration",
+          "s3:GetBucketLocation",
+          "s3:DeleteObject"
         ]
         Resource = [
           aws_s3_bucket.ssm_transfer.arn,
