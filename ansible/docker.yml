@@ -1,0 +1,22 @@
+---
+- name: Install Docker on target servers
+  hosts: targets
+  become: true
+
+  vars:
+    docker_users:
+      - ssm-user
+    docker_add_repo: false  # we add a compatible repo manually below (AL2023 reports releasever=2023, which breaks the role's default CentOS repo URL)
+
+  pre_tasks:
+    - name: Add Docker CE repo (CentOS 9 packages, compatible with AL2023)
+      yum_repository:
+        name: docker-ce
+        description: Docker CE Stable - x86_64
+        baseurl: https://download.docker.com/linux/centos/9/$basearch/stable
+        gpgcheck: true
+        gpgkey: https://download.docker.com/linux/centos/gpg
+        enabled: true
+
+  roles:
+    - geerlingguy.docker
