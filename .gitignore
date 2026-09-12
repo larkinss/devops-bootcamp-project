@@ -14,3 +14,4 @@ crash.*.log
 .DS_Store
 .vscode/
 *.swp
+*.pem
