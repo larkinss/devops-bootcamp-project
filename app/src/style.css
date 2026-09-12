@@ -1,0 +1,126 @@
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: system-ui, sans-serif; }
+#app { min-height: 100vh; display: grid; place-items: center; }
+.stage { position: fixed; inset: 0; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+
+.loader {
+  position: absolute; top: 50%; left: 50%; margin: -20px 0 0 -20px;
+  width: 40px; height: 40px;
+  border: 3px solid color-mix(in srgb, var(--ship-color) 30%, transparent);
+  border-top-color: var(--ship-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.overlay {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+  padding: 1.5rem; text-align: center; pointer-events: none;
+}
+.overlay .badge { width: 48px; height: 48px; color: var(--ship-color); }
+.overlay .badge svg { width: 100%; height: 100%; }
+.overlay .ship-name { margin: 0; font-size: clamp(1.4rem, 4vw, 2.4rem); letter-spacing: 0.02em; }
+.overlay .callsign { margin: 0; opacity: 0.7; font-variant: small-caps; }
+
+.fallback {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.6rem; padding: 2rem; text-align: center;
+}
+.fallback .badge { width: 72px; height: 72px; color: var(--ship-color); }
+.fallback .badge svg { width: 100%; height: 100%; }
+.fallback .ship-name { margin: 0; font-size: clamp(1.6rem, 5vw, 2.6rem); }
+.fallback .callsign { margin: 0; opacity: 0.7; font-variant: small-caps; }
+.fallback .swatch { width: 96px; height: 8px; border-radius: 4px; background: var(--ship-color); }
+.fallback .note { margin: 0; opacity: 0.55; font-size: 0.85rem; }
+
+/* ── Telemetry HUD — mission-control status grid, docked top-left ───────────── */
+.telemetry {
+  position: fixed; top: 1rem; left: 1rem; z-index: 5;
+  width: min(19rem, calc(100vw - 2rem));
+  padding: 0.7rem 0.85rem 0.8rem;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.72rem; line-height: 1.5;
+  color: CanvasText;
+  background: color-mix(in srgb, Canvas 80%, transparent);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid color-mix(in srgb, var(--ship-color) 55%, transparent);
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ship-color) 10%, transparent),
+              0 10px 34px color-mix(in srgb, var(--ship-color) 18%, transparent);
+  pointer-events: auto;
+}
+.tm-toggle {
+  position: absolute; top: 0.3rem; right: 0.35rem;
+  width: 1.4rem; height: 1.4rem; line-height: 1;
+  border: 0; border-radius: 6px; cursor: pointer;
+  background: transparent; color: var(--ship-color); font-size: 0.8rem;
+}
+.telemetry.is-collapsed .tm-body { display: none; }
+
+.tm-head {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-weight: 600; letter-spacing: 0.14em; color: var(--ship-color);
+}
+.tm-led {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ship-color); box-shadow: 0 0 8px var(--ship-color);
+}
+.tm-class { margin: 0.15rem 0 0.55rem; letter-spacing: 0.12em; opacity: 0.6; }
+
+.tm-spec {
+  display: grid; grid-template-columns: 4.4rem 1fr 1.5rem;
+  align-items: center; gap: 0.5rem; margin: 0.24rem 0;
+}
+.tm-k { letter-spacing: 0.1em; opacity: 0.8; }
+.tm-bar {
+  position: relative; height: 8px; border-radius: 2px; overflow: hidden;
+  background: color-mix(in srgb, CanvasText 14%, transparent);
+  /* segment the bar into cells for the "matrix readout" look */
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
+          mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
+}
+.tm-bar > i {
+  position: absolute; inset: 0; display: block;
+  width: calc(var(--v) * 1%);
+  background: var(--ship-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ship-color) 70%, transparent);
+}
+.tm-num { text-align: right; font-variant-numeric: tabular-nums; opacity: 0.85; }
+
+.tm-deploy {
+  margin-top: 0.6rem; padding-top: 0.5rem; display: grid; gap: 0.12rem;
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+}
+.tm-row { display: grid; grid-template-columns: 4.8rem 1fr; gap: 0.5rem; }
+.tm-row .tm-k { opacity: 0.55; }
+.tm-row .tm-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tm-led { animation: tm-pulse 2s ease-in-out infinite; }
+  .tm-bar > i { animation: tm-fill 0.9s ease-out both; }
+}
+@keyframes tm-pulse { 50% { opacity: 0.35; } }
+@keyframes tm-fill { from { width: 0; } }
+
+.ready {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 0.7rem 1.4rem;
+  font: 700 0.95rem/1 ui-monospace, Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+  color: #0b1220;
+  background: var(--ship-color, #22d3ee);
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 8px 30px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.ready:hover { transform: translateX(-50%) translateY(-2px); }
+.ready:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }

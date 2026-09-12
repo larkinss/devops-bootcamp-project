@@ -1,0 +1,20 @@
+{
+  "name": "shipit-launchpad",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The learner ship microsite — a customizable Three.js rocket a pipeline builds, checks, and ships",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 8080",
+    "test": "node scripts/preflight.mjs",
+    "test:unit": "node --test"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.7"
+  }
+}

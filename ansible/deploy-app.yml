@@ -1,0 +1,40 @@
+---
+- name: Deploy ship app container to web server
+  hosts: web
+  become: true
+
+  vars:
+    ecr_registry: "525077628079.dkr.ecr.ap-southeast-1.amazonaws.com"
+    ecr_repo: "devops-bootcamp/final-project-larkinss"
+    ecr_region: "ap-southeast-1"
+    image_tag: "latest"
+
+  tasks:
+    - name: Get ECR login password
+      delegate_to: localhost
+      become: false
+      ansible.builtin.command:
+        cmd: "aws ecr get-login-password --region {{ ecr_region }}"
+      register: ecr_password
+      changed_when: false
+
+    - name: Log in to ECR on the web server
+      community.docker.docker_login:
+        registry_url: "{{ ecr_registry }}"
+        username: AWS
+        password: "{{ ecr_password.stdout }}"
+
+    - name: Pull the app image from ECR
+      community.docker.docker_image:
+        name: "{{ ecr_registry }}/{{ ecr_repo }}:{{ image_tag }}"
+        source: pull
+        force_source: true
+
+    - name: Ensure app container is running
+      community.docker.docker_container:
+        name: ship-app
+        image: "{{ ecr_registry }}/{{ ecr_repo }}:{{ image_tag }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "80:80"
