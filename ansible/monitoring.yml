@@ -1,0 +1,28 @@
+---
+- name: Deploy Prometheus and Grafana monitoring stack
+  hosts: monitoring
+  become: true
+
+  tasks:
+    - name: Create monitoring directory
+      ansible.builtin.file:
+        path: /opt/monitoring
+        state: directory
+        mode: "0755"
+
+    - name: Deploy prometheus.yml config (bind mount source)
+      ansible.builtin.template:
+        src: templates/prometheus.yml.j2
+        dest: /opt/monitoring/prometheus.yml
+        mode: "0644"
+
+    - name: Deploy docker-compose file for monitoring stack
+      ansible.builtin.template:
+        src: templates/docker-compose.monitoring.yml.j2
+        dest: /opt/monitoring/docker-compose.yml
+        mode: "0644"
+
+    - name: Start Prometheus and Grafana via docker compose
+      community.docker.docker_compose_v2:
+        project_src: /opt/monitoring
+        state: present
