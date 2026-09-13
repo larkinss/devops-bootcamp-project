@@ -4,16 +4,38 @@
   become: true
 
   tasks:
-    - name: Create monitoring directory
+    - name: Create monitoring directories
       ansible.builtin.file:
-        path: /opt/monitoring
+        path: "{{ item }}"
         state: directory
         mode: "0755"
+      loop:
+        - /opt/monitoring
+        - /opt/monitoring/grafana/provisioning/datasources
+        - /opt/monitoring/grafana/provisioning/dashboards
 
     - name: Deploy prometheus.yml config (bind mount source)
       ansible.builtin.template:
         src: templates/prometheus.yml.j2
         dest: /opt/monitoring/prometheus.yml
+        mode: "0644"
+
+    - name: Deploy Grafana datasource provisioning
+      ansible.builtin.template:
+        src: templates/grafana-datasource.yml.j2
+        dest: /opt/monitoring/grafana/provisioning/datasources/prometheus.yml
+        mode: "0644"
+
+    - name: Deploy Grafana dashboard provider config
+      ansible.builtin.template:
+        src: templates/grafana-dashboard-provider.yml.j2
+        dest: /opt/monitoring/grafana/provisioning/dashboards/provider.yml
+        mode: "0644"
+
+    - name: Deploy Grafana dashboard JSON
+      ansible.builtin.copy:
+        src: templates/node-exporter-dashboard.json
+        dest: /opt/monitoring/grafana/provisioning/dashboards/node-exporter-dashboard.json
         mode: "0644"
 
     - name: Deploy docker-compose file for monitoring stack
