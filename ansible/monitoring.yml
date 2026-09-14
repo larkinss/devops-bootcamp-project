@@ -3,6 +3,9 @@
   hosts: monitoring
   become: true
 
+  vars_files:
+    - secrets.yml
+
   tasks:
     - name: Create monitoring directories
       ansible.builtin.file:

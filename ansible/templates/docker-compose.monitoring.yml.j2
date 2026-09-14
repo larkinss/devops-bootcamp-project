@@ -23,5 +23,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin123
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: always
+    command: tunnel --no-autoupdate run --token {{ cloudflare_tunnel_token }}
+    network_mode: "host"
+
 volumes:
   grafana-data:
